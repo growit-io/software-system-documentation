@@ -1,0 +1,6 @@
+# Structurizr Lite
+/.structurizr/
+/workspace.json
+
+# Vim
+*.swp

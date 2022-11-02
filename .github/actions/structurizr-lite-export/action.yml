@@ -1,0 +1,65 @@
+name: Structurizr Lite Export
+description: |
+  This action should run whenever a pushed commit modifies the Structurizr DSL
+  workspace files in this repository. The default behaviour for this action is
+  to export all diagrams in both PNG and SVG formats, create a new commit with
+  the added or updated images, and then to push the result back to the original
+  branch.
+inputs:
+  output:
+    description: 'Relative path of the output directory for exported diagrams'
+    required: false
+    default: 'docs/diagrams'
+  git-config:
+    description: 'Whether to configure the user name and email, or not'
+    required: false
+    default: 'true'
+  git-user-name:
+    description: 'Name of the Git user to use when creating a commit'
+    required: false
+    default: 'GitHub Actions'
+  git-user-email:
+    description: 'Email of the Git user to use when creating a commit'
+    required: false
+    default: 'github-actions@users.noreply.github.com'
+  git-commit:
+    description: 'Whether to commit the result, or not'
+    required: false
+    default: 'true'
+  git-commit-message:
+    description: 'The commit message to use'
+    required: false
+    default: 'chore: update Structurizr diagrams'
+  git-push:
+    description: 'Whether to push the resulting commit, or not'
+    required: false
+    default: 'true'
+runs:
+  using: composite
+  steps:
+    - shell: bash
+      run: |
+        # Export all diagrams
+        chmod -R g+w .structurizr-lite
+        export PUPPETEER_USER=pptruser:$(id -g)
+        make -f .structurizr-lite/Makefile.inc export stop
+      env:
+        STRUCTURIZR_LITE_OUTPUT: '${{ inputs.output }}'
+    - shell: bash
+      run: |
+        # Optionally commit and push the result
+        if [[ '${{ inputs.git-commit }}' = true ]]; then
+          if [[ '${{ inputs.git-config }}' = true ]]; then
+            git config --global user.name '${{ inputs.git-user-name }}'
+            git config --global user.email '${{ inputs.git-user-email }}'
+          fi
+
+          if git add -A '${{ inputs.output }}'; then
+            git commit -m '${{ inputs.git-commit-message }}' '${{ inputs.output }}'
+
+            if [[ '${{ inputs.git-push }}' = true ]]; then
+              git push
+            fi
+          fi
+        fi
+

@@ -1,0 +1,27 @@
+services:
+  structurizr-lite:
+    image: structurizr/lite:${STRUCTURIZR_LITE_VERSION:-latest}
+    ports:
+      - "8080:8080"
+    volumes:
+      - "../:/usr/local/structurizr"
+  puppeteer:
+    # https://pptr.dev/guides/docker/
+    image: ghcr.io/puppeteer/puppeteer:${PUPPETEER_VERSION:-19.2.1}
+    # In GitHub Actions we need to assume the runner's UID and/or GID.
+    user: ${PUPPETEER_USER:-pptruser}
+    # https://stackoverflow.com/questions/11904772/how-to-create-a-loop-in-bash-that-is-waiting-for-a-webserver-to-respond
+    command: |
+      bash -ec '
+      npm install
+
+      curl -Ss --head -X GET --retry 15 --retry-connrefused --retry-delay 1 http://structurizr-lite:8080
+      curl -Ss -X POST --retry 3 --retry-delay 1 -d submit=Accept http://structurizr-lite:8080/eula
+
+      npm run-script export -- http://structurizr-lite:8080 png
+      npm run-script export -- http://structurizr-lite:8080 svg'
+    volumes:
+      - "./:/home/pptruser"
+    restart: on-failure
+    depends_on:
+      - structurizr-lite

@@ -1,0 +1,25 @@
+# This workflow triggers whenever a pushed commit modifies the Structurizr DSL
+# workspace files in this repository, exports all diagrams in both PNG and SVG
+# formats, and finally pushes the added or updated images in a new commit.
+
+name: Structurizr Lite
+
+on:
+  push:
+    paths:
+      # If you maintain more than one Structurizr DSL file or sources of model
+      # data which could affect the rendered diagrams, add them below.
+      - workspace.dsl
+
+      # The following paths are only matched for convenience in order to re-run
+      # this workflow whenever the workflow implementation itself changes.
+      - .github/actions/structurizr-lite-export/**
+      - .github/workflows/structurizr-lite.yml
+      - .structurizr-lite/**
+
+jobs:
+  structurizr-lite-export:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: ./.github/actions/structurizr-lite-export
