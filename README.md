@@ -1,4 +1,5 @@
 # Software System Documentation
+[<img src="docs/diagrams/structurizr-Overview.png" align="right" width="45%" style="border: solid grey 1px; border-radius: 10px; padding: 2px; margin: 5px;"/>](docs/overview.md)
 
 This GitHub template repository provides a starting point for working collaboratively on the documentation of a potentially complex software system. Its features include:
 
